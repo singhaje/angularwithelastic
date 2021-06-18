@@ -18,6 +18,9 @@ export class TestEsComponent implements OnInit {
     this.es.isAvailable().then(() => {
       this.status = 'OK';
       this.isConnected = true;
+
+      this.es.performSearch();
+
     }, error => {
       this.status = 'ERROR';
       this.isConnected = false;
@@ -26,5 +29,7 @@ export class TestEsComponent implements OnInit {
       this.cd.detectChanges();
     });
   }
+
+ 
 
 }

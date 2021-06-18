@@ -18,18 +18,50 @@ export class ElasticsearchService {
   private _connect() {
     this.client = new elasticsearch.Client({
       host: 'localhost:9200',
-      log: 'trace'//,
-      // auth: {
-      //   username: 'elastic',
-      //   password: 'changeme'
-      // }
+      log: 'trace',
+      auth: {
+        username: 'elastic',
+        password: 'changeme'
+      }
     });
   }
 
   isAvailable(): any {
     return this.client.ping({
       requestTimeout: Infinity,
-      body: 'hello ozenero!'
+      body: 'Elastic Search Connected'
     });
+  }
+
+  performSearch(): any {
+    var objQuery = {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "term": {
+                  "param2": "HUMAN"
+              }
+            },{
+              "match": {
+                "param1": "param1"
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    this.client.search({
+      index: 'masterindex',
+      body: {
+        "size":0,
+        "query": JSON.stringify(objQuery)        
+      }
+    },(error, response)=> {
+      console.log(response);
+      console.log(error);
+    })
+    
   }
 }
