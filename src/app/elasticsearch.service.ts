@@ -62,6 +62,13 @@ export class ElasticsearchService {
       console.log(response);
       console.log(error);
     })
+
+    this.client.search({
+      index: 'my-index',
+      body: { foo: 'bar' }
+    }, (err, { body, statusCode, headers, warnings }) => {
+      if (err) console.log(err)
+    })
     
   }
 }
