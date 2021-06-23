@@ -1,4 +1,5 @@
-import { Client } from 'elasticsearch-browser';
+import * as elasticsearch from 'elasticsearch-browser';
+import { Client } from 'elasticsearch/index';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -51,7 +52,7 @@ export class ElasticnewsearchService {
   //   });
   // } 
 
-  getAllDocuments(_index, _type): any {
+  getAllDocuments(_index, _type, _page): any {
     return this.client.search({
       body: this.queryalldocs,
       filterPath: ['hits.hits._source']
@@ -59,8 +60,8 @@ export class ElasticnewsearchService {
   }
 
   getPaginatedDocuments(_query, _page, _index?, _type?): any {
-    return this.client.search({
-      q: this.queryalldocs,
+    return this.client.search({      
+      q: JSON.stringify(this.queryalldocs),
       from: 0,
       size: 200
     });
@@ -99,13 +100,14 @@ export class ElasticnewsearchService {
   }
 
   private connect() {
-    this.client = new Client({
+    this.client = new elasticsearch.Client({
       host: 'localhost:9200',
-      log: 'trace',
-      auth: {
-        username: 'elastic',
-        password: 'changeme'
-      }
+      //log: 'trace',
+      httpAuth: "elastic:chngename"
+      // auth: {
+      //   username: 'elastic',
+      //   password: 'changeme'
+      // }
     });
   }
 

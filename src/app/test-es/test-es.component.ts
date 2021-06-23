@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ElasticsearchService } from '../elasticsearch.service';
+//import { ElasticsearchService } from '../elasticsearch.service';
 import { ElasticnewsearchService } from '../elasticnewsearch.service';
 
 @Component({
@@ -20,7 +20,7 @@ export class TestEsComponent implements OnInit {
   
   public esData: any[];
 
-  constructor(private es: ElasticsearchService, private es1: ElasticnewsearchService, private cd: ChangeDetectorRef) {
+  constructor( private es1: ElasticnewsearchService, private cd: ChangeDetectorRef) {
     this.isConnected = false;
   }
 
@@ -33,6 +33,7 @@ export class TestEsComponent implements OnInit {
       console.log('Connected ');
       this.status = 'OK';
       this.isConnected = true;
+      this.performSearch("exec_inc","_search",1);
     }, error => {
       this.status = 'ERROR';
       this.isConnected = false;
@@ -41,10 +42,10 @@ export class TestEsComponent implements OnInit {
       this.cd.detectChanges();
     });
 
-    this.searchsearch("exec_inc","_search",1);
+    //this.performSearch("exec_inc","_search",1);
   }
 
-  searchsearch(query, index, page) {
+  performSearch(query, index, page) {
     console.log('In Search');
     const sanitized = TestEsComponent.sanitized(query);
 
