@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ElasticsearchService } from '../elasticsearch.service';
 import { ElasticnewsearchService } from '../elasticnewsearch.service';
 
@@ -10,29 +10,29 @@ import { ElasticnewsearchService } from '../elasticnewsearch.service';
 export class TestEsComponent implements OnInit {
   isConnected = false;
   status: string;
-  returnedResponse : any;
+  returnedResponse: any;
+  searchResponse = '';
+  currentPage: number = 1;
+  totalHits: number;
+  searchTime: number;
+  totalPages: any;
+  PER_PAGE = 5;
+  
+  public esData: any[];
 
-  constructor(private es: ElasticsearchService, private es1: ElasticnewsearchService,  private cd: ChangeDetectorRef) {
+  constructor(private es: ElasticsearchService, private es1: ElasticnewsearchService, private cd: ChangeDetectorRef) {
     this.isConnected = false;
   }
 
+  static sanitized(query): string {
+    return query.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+  }
+
   ngOnInit() {
-    this.es.isAvailable().then(() => {
+    this.es1.isAvailable().then(() => {
+      console.log('Connected ');
       this.status = 'OK';
       this.isConnected = true;
-      
-
-      this.es.performSearch();
-      this.es1.getAllDocuments('index', 'type')
-        .then(response => {
-          this.returnedResponse = response.hits.hits;
-          console.log(response);
-        }, error => {
-          console.error(error);
-        }).then(() => {
-          console.log('Show Customer Completed!');
-        });
-
     }, error => {
       this.status = 'ERROR';
       this.isConnected = false;
@@ -40,8 +40,50 @@ export class TestEsComponent implements OnInit {
     }).then(() => {
       this.cd.detectChanges();
     });
+
+    this.searchsearch("exec_inc","_search",1);
   }
 
- 
+  searchsearch(query, index, page) {
+    console.log('In Search');
+    const sanitized = TestEsComponent.sanitized(query);
+
+    if (sanitized.length) {
+      this.searchResponse = '';
+      this.currentPage = page;
+      // Search all indexes on ES
+      if (index !== 'all') {
+        this.es1.getPaginatedDocuments(sanitized, page, index).then((body) => {
+          if (body.hits.total > 0) {
+            this.esData = body.hits.hits;
+            this.totalHits = body.hits.total;
+            this.searchTime = body.hits.time;
+            this.totalPages = Array(Math.ceil(body.hits.total / this.PER_PAGE)).fill(4);
+          } else {
+            this.searchResponse = 'No matches found';
+          }
+        }, (err) => {
+          this.searchResponse = 'Oops! Something went wrong... ERROR: ' + err.error;
+        });
+      } else {
+        this.es1.getPaginatedDocuments(sanitized, page).then((body) => {
+          if (body.hits.total > 0) {
+            this.esData = body.hits.hits;
+            this.totalHits = body.hits.total;
+            this.searchTime = body.took;
+            this.totalPages = Array(Math.ceil(body.hits.total / this.PER_PAGE)).fill(4);
+          } else {
+            this.searchResponse = 'No matches found';
+          }
+        }, (err) => {
+          this.searchResponse = 'Oops! Something went wrong... ERROR: ' + err.error;
+        });
+      }
+    } else {
+      this.searchResponse = 'Nothing found';
+    }
+  }
+
+
 
 }
